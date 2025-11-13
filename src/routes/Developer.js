@@ -1,12 +1,13 @@
 import express from 'express'
 import { PrismaClient } from '@prisma/client'
 import { TokenMid } from '../middlewares/TokenMid.js'
+import { checkOTPCookieMiddleware, requireOTPVerifiedMiddleware } from '../OTP/OTP.js'
 
 const prisma = new PrismaClient()
 const router = express.Router()
 
 // GET /api/dev
-router.get('/', TokenMid, async (req, res) => {
+router.get('/', TokenMid, checkOTPCookieMiddleware, requireOTPVerifiedMiddleware, async (req, res) => {
   try {
     const usuarioId = req.usuario?.id
     if (!usuarioId)
@@ -77,7 +78,7 @@ router.get('/', TokenMid, async (req, res) => {
 })
 
 // POST /dev/new
-router.post('/new', TokenMid, async (req, res) => {
+router.post('/new', TokenMid, checkOTPCookieMiddleware, requireOTPVerifiedMiddleware, async (req, res) => {
   try {
     const usuarioId = req.usuario?.id
     if (!usuarioId)
@@ -154,7 +155,7 @@ router.post('/new', TokenMid, async (req, res) => {
 })
 
 // PUT /dev/edit/:slug
-router.put('/edit/:slug', TokenMid, async (req, res) => {
+router.put('/edit/:slug', TokenMid, checkOTPCookieMiddleware, requireOTPVerifiedMiddleware, async (req, res) => {
   try {
     const usuarioId = req.usuario?.id
     if (!usuarioId) return res.status(401).json({ error: 'No autenticado' })

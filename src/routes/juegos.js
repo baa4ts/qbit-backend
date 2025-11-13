@@ -3,14 +3,15 @@ import { PrismaClient } from '@prisma/client';
 import { TokenMid } from '../middlewares/TokenMid.js';
 import { TokenOpcional } from '../middlewares/TokenOpcional.js';
 import { CorreoTienda } from "../util/enviarCorreo.js"
-import { checkOTPCookieMiddleware } from '../OTP/OTP.js';
+import { checkOTPCookieMiddleware, requireOTPVerifiedMiddleware } from '../OTP/OTP.js';
 
 const router = Router();
 const prisma = new PrismaClient();
 
 // GET /juegos/usuario?page=1&categoria=Aventura&categoria=RPG&buscar=pal
-router.get('/usuario', TokenMid, checkOTPCookieMiddleware, async (req, res) => {
+router.get('/usuario', TokenMid, checkOTPCookieMiddleware, requireOTPVerifiedMiddleware, async (req, res) => {
   const usuarioId = req.usuario?.id
+  console.log("Aca")
   if (!usuarioId) return res.sendStatus(401)
 
   const page = Number(req.query.page) || 1
@@ -152,7 +153,7 @@ router.get('/home', async (req, res) => {
 });
 
 // POST /juegos/buy
-router.post('/buy', TokenMid, checkOTPCookieMiddleware, async (req, res) => {
+router.post('/buy', TokenMid, checkOTPCookieMiddleware, requireOTPVerifiedMiddleware, async (req, res) => {
   const { juegos } = req.body;
   const usuarioId = req.usuario?.id;
   const datos = [];
@@ -267,8 +268,8 @@ router.get('/', async (req, res) => {
 
 
 // GET /juegos/:slug
-// Si el usuario esta logueado, TokenMid agregara req.usuario
-router.get('/:slug', TokenOpcional, checkOTPCookieMiddleware, async (req, res) => {
+// Si el usuario esta logueado, TokenMid agregara mas informacion
+router.get('/:slug', TokenOpcional, async (req, res) => {
   const { slug } = req.params;
   const userId = req.usuario?.id || null;
 

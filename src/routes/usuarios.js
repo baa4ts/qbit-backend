@@ -3,13 +3,13 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { PrismaClient } from '@prisma/client'
 import { TokenMid } from '../middlewares/TokenMid.js';
-import { checkOTPCookieMiddleware, generarOTP, generarOTPCookie, verificarOTPCookie } from '../OTP/OTP.js';
+import { checkOTPCookieMiddleware, generarOTP, generarOTPCookie, requireOTPVerifiedMiddleware, verificarOTPCookie } from '../OTP/OTP.js';
 import { CorreoTienda } from '../util/enviarCorreo.js';
 
 const router = Router()
 const prisma = new PrismaClient()
 
-const { JWT_SECRET = "MI_SECRETO", OTP_COOKIE_NAME = "qbit-otp" } = process.env;
+const { JWT_SECRET = "MI_SECRETO" } = process.env;
 
 // LOGIN
 router.post('/login', async (req, res) => {
@@ -26,9 +26,8 @@ router.post('/login', async (req, res) => {
     const token = jwt.sign(
       { id: usuario.id, permiso: usuario.permiso },
       JWT_SECRET,
-      { expiresIn: '1d' }
+      { expiresIn: '1h' }
     )
-
 
     //
     // Seguridad
@@ -73,7 +72,7 @@ router.post('/register', async (req, res) => {
     const token = jwt.sign(
       { id: nuevoUsuario.id, permiso: nuevoUsuario.permiso },
       JWT_SECRET,
-      { expiresIn: '1d' }
+      { expiresIn: '1h' }
     )
 
     //
@@ -105,19 +104,16 @@ router.post('/otp', TokenMid, (req, res) => {
   const { otp } = req.body;
   if (!otp) return res.status(400).json({ ok: false, mensaje: 'OTP requerido' });
 
-  const valido = verificarOTPCookie(req, otp);
+  const valido = verificarOTPCookie(req, otp, res);
 
   if (!valido) {
     return res.status(401).json({ ok: false, mensaje: 'OTP incorrecto o expirado' });
   }
-
-  // OTP correcto: limpiar cookie y devolver ok
-  res.clearCookie(OTP_COOKIE_NAME);
   return res.status(200).json({ mensaje: 'OTP verificado correctamente' });
 });
 
 // PUT /dev/usuario
-router.put('/configuracion', TokenMid, checkOTPCookieMiddleware, async (req, res) => {
+router.put('/configuracion', TokenMid, checkOTPCookieMiddleware, requireOTPVerifiedMiddleware, async (req, res) => {
   try {
     const usuarioId = req.usuario?.id
     if (!usuarioId) return res.status(401).json({ error: 'No autenticado' })
@@ -154,7 +150,7 @@ router.put('/configuracion', TokenMid, checkOTPCookieMiddleware, async (req, res
 })
 
 // GET /dev/usuario
-router.get('/configuracion', TokenMid, checkOTPCookieMiddleware, async (req, res) => {
+router.get('/configuracion', TokenMid, checkOTPCookieMiddleware, requireOTPVerifiedMiddleware, async (req, res) => {
   try {
     const usuarioId = req.usuario?.id
     if (!usuarioId) return res.status(401).json({ error: 'No autenticado' })
@@ -220,7 +216,7 @@ router.get('/compartir/:uuid', async (req, res) => {
 })
 
 // GET USUARIO POR UUID (incluye ultimos 3 juegos que posee)
-router.get('/:uuid', checkOTPCookieMiddleware, async (req, res) => {
+router.get('/:uuid', TokenMid, checkOTPCookieMiddleware, requireOTPVerifiedMiddleware, async (req, res) => {
   const { uuid } = req.params
 
   if (!uuid) return res.status(400).json({ ok: false, mensaje: 'UUID requerido' })
