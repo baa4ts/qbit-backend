@@ -3,7 +3,7 @@ import crypto from 'crypto';
 const {
     OTP_COOKIE_NAME = 'qbit-otp',
     OTP_COOKIE_PASS = 'as009ad099a',
-    NODE_ENV
+    NODE_ENV = "production"
 } = process.env;
 
 // Generar codigo otp
