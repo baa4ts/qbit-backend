@@ -44,6 +44,13 @@ async function main() {
       password: "$2a$10$ZVzzeUeLjGITp60eENsV2.jBMa3hLVPUipiT7O7mhnPJ4CklW/nFe",
       icono: "https://i.pinimg.com/736x/ff/2c/14/ff2c14f9a3d80212e9264652d1a6212a.jpg",
       biografia: "Director de videojuegos japonés, fundador de Kojima Productions. Creador de Metal Gear Solid y Death Stranding."
+    }, {
+      nombre: "Carlos Morales",
+      email: "baa4ts@gmail.com",
+      permiso: 2,
+      password: "$2a$10$SL7/Os45/aXNnT0PDnPzaeBAi87Js7IsbItRt.kfF1dYDewso4TLa",
+      icono: "https://i.pinimg.com/736x/cb/96/f7/cb96f77a6190f553b0c2e0bc142cb2f6.jpg",
+      biografia: "Un videojuego mas"
     },
     {
       nombre: "Shigeru Miyamoto",
