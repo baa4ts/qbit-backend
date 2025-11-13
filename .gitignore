@@ -1,0 +1,7 @@
+/node_module
+node_modules
+/prisma/dev.db
+/prisma/migrations
+**/.env
+.env
+pnpm-workspace.yaml

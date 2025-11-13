@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id        String   @id @default(uuid())
+  nombre    String   @unique
+  email     String   @unique
+  icono     String?  @default("https://i.pinimg.com/1200x/91/5e/73/915e73251f6f99e1b1c1d7b1b55c2594.jpg")
+  biografia String?  @default("Sin biografia")
+  permiso   Int      @default(1)
+  password  String
+  createdAt DateTime @default(now())
+
+  juegos Juego[] @relation("UsuariosJuegos") // juegos que posee
+  autor  Juego[] @relation("AutorJuegos") // juegos que creo
+}
+
+model Categoria {
+  id     Int    @id @default(autoincrement())
+  nombre String @unique
+
+  juegos Juego[] @relation("JuegoCategorias")
+}
+
+model Juego {
+  id          Int    @id @default(autoincrement())
+  titulo      String
+  slug        String @unique
+  precio      Float
+  descripcion String
+  banner      String
+  descarga    String?
+  contador    Int? @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt  
+  
+  // Autor
+  autorId String
+  autor   Usuario @relation("AutorJuegos", fields: [autorId], references: [id])
+
+  // Categorias
+  categorias Categoria[] @relation("JuegoCategorias")
+
+  // Recursos
+  recursos Recurso[]
+
+  // Usuarios que poseen el juego
+  usuarios Usuario[] @relation("UsuariosJuegos")
+}
+
+model Recurso {
+  id      String @id @default(uuid())
+  tipo    String // "imagen" | "video"
+  recurso String
+  juegoId Int
+  juego   Juego  @relation(fields: [juegoId], references: [id])
+}

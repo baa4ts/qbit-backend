@@ -1,0 +1,5 @@
+pnpm install
+pnpm approve-builds
+pnpx prisma migrate dev --name init
+pnpm seed
+pnpm start
